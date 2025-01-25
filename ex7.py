@@ -14,6 +14,14 @@ STARTER_MENU = '''Choose your starter Pokemon:
 1) Treecko
 2) Torchic
 3) Mudkip'''
+POKEDEX_MENU = '''
+-- {}'s Pokedex Menu --
+1. Add Pokemon
+2. Display Pokedex
+3. Release Pokemon
+4. Evolve Pokemon
+5. Back to Main
+'''
 
 
 ########################
@@ -117,18 +125,37 @@ def insert_owner_bst(root, new_node):
             print("Name already exists")  # TODO check
             return False
         if name < current_name:
+            if current_root['left'] is None:
+                current_root['left'] = new_node
+                break
+            # Else
             current_root = current_root['left']
         elif name > current_name:
+            if current_root['right'] is None:
+                current_root['right'] = new_node
+                break
+            # Else
             current_root = current_root['right']
-    current_root = new_node
     return root
 
 
 def find_owner_bst(root, owner_name):
     """
     Locate a BST node by owner_name. Return that node or None if missing.
+    owner_name has to be .lower()
     """
-    pass
+    if root is None:
+        return None
+    if root['name'].lower() == owner_name:
+        return root
+
+    attempt_left = find_owner_bst(root['left'], owner_name)
+    if attempt_left:
+        return attempt_left
+    attempt_right = find_owner_bst(root['right'], owner_name)
+    if attempt_right:
+        return attempt_right
+    return None
 
 
 def min_node(node):
@@ -185,7 +212,28 @@ def add_pokemon_to_owner(owner_node):
     """
     Prompt user for a Pokemon ID, find the data, and add to this owner's pokedex if not duplicate.
     """
-    pass
+    valid_choice = False
+    poke_id = -1
+    while not valid_choice:
+        poke_id = input("Enter Pokemon ID to add:")
+        if not poke_id.isdecimal():
+            print("Invalid choice") # TODO check this
+            continue
+        poke_id = int(poke_id)
+        if poke_id < 1 or poke_id > 135:
+            print("Invalid choice")  # TODO check this
+            continue
+        valid_choice = True
+    # Get all pokemon IDs
+    pokemons_ids = [pokemon['ID'] for pokemon in owner_node['pokedex']]
+    if poke_id in pokemons_ids:
+        print("Pokemon already in the list. No changes made.")
+        return
+    pokemon_data = HOENN_DATA[poke_id-1]
+    owner_node['pokedex'].append(pokemon_data)
+    print(f"Pokemon {pokemon_data['Name']} (ID {pokemon_data['ID']}) added to {owner_node['name']}'s Pokedex.")
+
+
 
 
 def release_pokemon_by_name(owner_node):
@@ -277,6 +325,29 @@ def display_filter_sub_menu(owner_node):
 # 8) Sub-menu & Main menu
 ########################
 
+def create_pokedex(owner_root):
+    name = input("Owner name:")
+    print(STARTER_MENU)
+    if find_owner_bst(owner_root, name.lower()):
+        print(f"Owner '{name}' already exists. No new Pokedex created.")
+        return
+
+    starter_choice = input("Your choice:")
+    while starter_choice not in ['1', '2', '3']:
+        print("Invalid input")  # TODO check
+        starter_choice = input("Your choice:")
+    starter_choice = int(starter_choice)
+    # Convert input to index and multiply by 3 to find the correct starter
+    starter_choice = (starter_choice - 1) * 3
+
+    new_node = create_owner_node(name, starter_choice + 1)  # Convert from index back to id
+    owner_root = insert_owner_bst(owner_root, new_node)
+
+    starter_name = new_node['pokedex'][0]['Name']
+    print('New Pokedex created for {} with starter {}.'.format(new_node['name'], starter_name))
+    return owner_root
+
+
 def existing_pokedex():
     """
     Ask user for an owner name, locate the BST node, then show sub-menu:
@@ -286,9 +357,20 @@ def existing_pokedex():
     - Evolve
     - Back
     """
+    global owner_root
     name = input("Owner name:")
     lower_name = name.lower()
-
+    node = find_owner_bst(owner_root, name)
+    if not node:
+        print(f"Owner '{name}' not found.")
+        return
+    # Else
+    print(POKEDEX_MENU.format(name))
+    choice = -1
+    while choice != '5':
+        choice = input("Your choice:")
+        if choice == '1':
+            add_pokemon_to_owner(node)
 
 def main_menu():
     """
@@ -302,29 +384,19 @@ def main_menu():
     """
     global owner_root
     choice = -1
-    while choice != 6:
+    while choice != '6':
         print(MAIN_MENU)
         choice = input("Your choice:")
 
         # Ensure choice is digit
         if not choice.isdigit():
             print("Invalid input")  # TODO check
-        if choice == '1':
-            name = input("Owner name:")
-            print(STARTER_MENU)
-            starter_choice = input("Your choice:")
-            while starter_choice not in ['1', '2', '3']:
-                print("Invalid input")  # TODO check
-                starter_choice = input("Your choice:")
-            starter_choice = int(starter_choice)
-            # Convert input to index and multiply by 3 to find the correct starter
-            starter_choice = (starter_choice - 1) * 3
-
-            new_node = create_owner_node(name, starter_choice + 1)  # Convert from index back to id
-            owner_root = insert_owner_bst(owner_root, new_node)
-
-            starter_name = new_node['pokedex'][0]['Name']
-            print('New Pokedex created for {} with starter {}.'.format(new_node['name'], starter_name))
+        elif choice == '1':
+            owner_root = create_pokedex(owner_root)
+        elif choice == '2':
+            existing_pokedex()
+        else:
+            print("Invalid input")  # TODO check
 
 
 def main():
@@ -336,3 +408,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
