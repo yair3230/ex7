@@ -22,6 +22,15 @@ POKEDEX_MENU = '''
 4. Evolve Pokemon
 5. Back to Main
 '''
+FILTER_MENU = '''-- Display Filter Menu --
+1. Only a certain Type
+2. Only Evolvable
+3. Only Attack above __
+4. Only HP above __
+5. Only names starting with letter(s)
+6. All of them!
+7. Back
+'''
 
 
 ########################
@@ -93,7 +102,9 @@ def display_pokemon_list(poke_list):
     """
     Display a list of Pokemon dicts, or a message if empty.
     """
-    pass
+    for pokemon in poke_list:
+        print(f"ID: {pokemon['ID']}, Name: {pokemon['Name']}, Type: {pokemon['Type']},"
+              f" HP: {pokemon['HP']}, Attack: {pokemon['Attack']}, Can Evolve: {pokemon['Can Evolve']}")
 
 
 ########################
@@ -105,7 +116,6 @@ def create_owner_node(owner_name, first_pokemon=None):
     Create and return a BST node dict with keys: 'owner', 'pokedex', 'left', 'right'.
     """
     index = first_pokemon - 1
-    print(HOENN_DATA[index])
     return {'name': owner_name, 'pokedex': [HOENN_DATA[index]], 'left': None, 'right': None}
 
 
@@ -217,7 +227,7 @@ def add_pokemon_to_owner(owner_node):
     while not valid_choice:
         poke_id = input("Enter Pokemon ID to add:")
         if not poke_id.isdecimal():
-            print("Invalid choice") # TODO check this
+            print("Invalid choice")  # TODO check this
             continue
         poke_id = int(poke_id)
         if poke_id < 1 or poke_id > 135:
@@ -229,11 +239,9 @@ def add_pokemon_to_owner(owner_node):
     if poke_id in pokemons_ids:
         print("Pokemon already in the list. No changes made.")
         return
-    pokemon_data = HOENN_DATA[poke_id-1]
+    pokemon_data = HOENN_DATA[poke_id - 1]
     owner_node['pokedex'].append(pokemon_data)
     print(f"Pokemon {pokemon_data['Name']} (ID {pokemon_data['ID']}) added to {owner_node['name']}'s Pokedex.")
-
-
 
 
 def release_pokemon_by_name(owner_node):
@@ -318,7 +326,31 @@ def display_filter_sub_menu(owner_node):
     6) All
     7) Back
     """
-    pass
+    print(FILTER_MENU)
+    choice = -1
+    while choice != '7':
+        choice = input("Your choice:")
+        pokemon_list = []
+        if choice == '1':
+            lower_type = input("Which Type? (e.g. GRASS, WATER):")
+            lower_type = lower_type.lower()
+
+            for pokemon in owner_node['pokedex']:
+                if pokemon['Type'].lower() == lower_type:
+                    pokemon_list.append(pokemon)
+
+            # In one line:
+            # pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Type'].lower() == lower_type]
+        if choice == '2':
+            # Not that for some dumb fucking reason can evolve is a string and not a bool
+            pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Can Evolve'] == 'TRUE']
+        if choice == '3':
+            pass
+        if pokemon_list:
+            display_pokemon_list(pokemon_list)
+        else:
+            print('There are no Pokemons in this Pokedex that match the criteria.')
+
 
 
 ########################
@@ -371,6 +403,17 @@ def existing_pokedex():
         choice = input("Your choice:")
         if choice == '1':
             add_pokemon_to_owner(node)
+        elif choice == '2':
+            display_filter_sub_menu(node)
+        elif choice == '3':
+            pass
+        elif choice == '4':
+            pass
+        elif choice == '5':
+            pass
+        else:
+            print('Invalid choice')  # TODO check this
+
 
 def main_menu():
     """
@@ -408,4 +451,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
