@@ -139,7 +139,7 @@ def insert_owner_bst(root, new_node):
         current_name = current_root['name']
         current_name = current_name.lower()
         if name == current_name:
-            print("Name already exists")  # TODO check
+            print(f"Owner '{new_node['name']}' already exists. No new Pokedex created.")
             return False
         if name < current_name:
             if current_root['left'] is None:
@@ -216,7 +216,7 @@ def delete_owner_bst(root, owner_name):
 
 
 def delete_owner(root):
-    name = input('Enter owner to delete:')
+    name = input('Enter owner to delete: ')
     if find_owner_bst(root, name):
         print(f"Deleting {name}'s entire Pokedex...")
         root = delete_owner_bst(root, name)
@@ -270,10 +270,9 @@ def add_pokemon_to_owner(owner_node):
     valid_choice = False
     poke_id = -1
     while not valid_choice:
-        poke_id = input("Enter Pokemon ID to add:")
-        print("ADDING", poke_id)
+        poke_id = input("Enter Pokemon ID to add: ")
         if not poke_id.isdecimal():
-            print("Invalid choice")  # TODO check this
+            print(f"ID {poke_id} not found in Honen data.")
             return
         poke_id = int(poke_id)
         if poke_id < 1 or poke_id > 135:
@@ -287,6 +286,7 @@ def add_pokemon_to_owner(owner_node):
         return
     pokemon_data = HOENN_DATA[poke_id - 1]
     owner_node['pokedex'].append(pokemon_data)
+    print()
     print(f"Pokemon {pokemon_data['Name']} (ID {pokemon_data['ID']}) added to {owner_node['name']}'s Pokedex.")
 
 
@@ -297,7 +297,7 @@ def release_pokemon_by_name(owner_node):
     # Enumerate returns a tuple: (index, pokemon)
     index_to_remove = -1
     pokemon_name = ''
-    name = input("Enter Pokemon Name to release:")
+    name = input("Enter Pokemon Name to release: ")
     name_lower = name.lower()
     for index, pokemon in enumerate(owner_node['pokedex']):
         pokemon_name = pokemon['Name']
@@ -319,7 +319,7 @@ def evolve_pokemon_by_name(owner_node):
     3) Insert new
     4) If new is a duplicate, remove it immediately
     """
-    name = input('Enter Pokemon Name to evolve:')
+    name = input('Enter Pokemon Name to evolve: ')
     name_lower = name.lower()
     index_to_remove = -1
     pokemon_to_evolve = None
@@ -334,10 +334,10 @@ def evolve_pokemon_by_name(owner_node):
             break  # found it, stop searching
 
     if index_to_remove == -1:
-        print("Pokemon not found")  # TODO check
+        print(f"No Pokemon named '{name}' in {owner_node['name']}'s Pokedex.")
         return
     if pokemon_to_evolve['Can Evolve'] == 'FALSE':
-        print("Pokemon cannot evolve")  # TODO check
+        print(f"{name} cannot evolve.")
         return
 
     # Else, Find evolution
@@ -421,10 +421,10 @@ def print_all_owners(root):
     """
 
     print(PRINT_OWNERS_MENU)
-    choice = input("Your choice:")
+    choice = input("Your choice: ")
     while choice not in ['1', '2', '3', '4']:
-        print("Invalid choice")  # TODO check
-        choice = input("Your choice:")
+        print("Invalid choice.")
+        choice = input("Your choice: ")
     if choice == '1':
         bfs_print(root)
     elif choice == '2':
@@ -499,10 +499,10 @@ def display_filter_sub_menu(owner_node):
     choice = -1
     while choice != '7':
         print(FILTER_MENU)
-        choice = input("Your choice:")
+        choice = input("Your choice: ")
         pokemon_list = []
         if choice == '1':
-            lower_type = input("Which Type? (e.g. GRASS, WATER):")
+            lower_type = input("Which Type? (e.g. GRASS, WATER): ")
             lower_type = lower_type.lower()
 
             for pokemon in owner_node['pokedex']:
@@ -515,10 +515,24 @@ def display_filter_sub_menu(owner_node):
             # Note that for some dumb reason "can evolve" is a string and not a bool
             pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Can Evolve'] == 'TRUE']
         elif choice == '3':
-            attack_threshold = input("Enter Attack threshold:")
-            if not attack_threshold.isdecimal():
-                print("Invalid input")  # TODO check
-                continue
+
+            while True:
+                attack_threshold = input("Enter Attack threshold: ")
+                if attack_threshold.isdecimal():
+                    break
+                if len(attack_threshold) == 0:
+                    print("Invalid input.")
+                # either not a number, or a negative number. we allow negative numbers
+                if attack_threshold[0] == '-':
+                    attack_threshold = attack_threshold[1:]
+                    if attack_threshold.isdecimal():
+                        attack_threshold = 0
+                        break
+                    else:
+                        print("Invalid input.")
+                else:
+                    print("Invalid input.")
+
             attack_threshold = int(attack_threshold)
             for pokemon in owner_node['pokedex']:
                 if pokemon['Attack'] > attack_threshold:
@@ -527,10 +541,23 @@ def display_filter_sub_menu(owner_node):
             # In one line:
             # pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Attack'] > attack_threshold]
         elif choice == '4':
-            hp_threshold = input("Enter HP threshold:")
-            if not hp_threshold.isdecimal():
-                print("Invalid input")  # TODO check
-                continue
+            while True:
+                hp_threshold = input("Enter HP threshold: ")
+                if hp_threshold.isdecimal():
+                    break
+                if len(hp_threshold) == 0:
+                    print("Invalid input.")
+                # either not a number, or a negative number. we allow negative numbers
+                if hp_threshold[0] == '-':
+                    hp_threshold = hp_threshold[1:]
+                    if hp_threshold.isdecimal():
+                        hp_threshold = 0
+                        break
+                    else:
+                        print("Invalid input.")
+                else:
+                    print("Invalid input.")
+
             hp_threshold = int(hp_threshold)
             for pokemon in owner_node['pokedex']:
                 if pokemon['HP'] > hp_threshold:
@@ -538,7 +565,7 @@ def display_filter_sub_menu(owner_node):
             # In one line:
             # pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['HP'] > hp_threshold]
         elif choice == '5':
-            letters = input("Starting letter(s):")
+            letters = input("Starting letter(s): ")
             lower_letters = letters.lower()
             for pokemon in owner_node['pokedex']:
                 name_lower = pokemon['Name'].lower()
@@ -562,16 +589,16 @@ def display_filter_sub_menu(owner_node):
 ########################
 
 def create_pokedex(owner_root):
-    name = input("Owner name:")
+    name = input("Owner name: ")
     print(STARTER_MENU)
     if find_owner_bst(owner_root, name.lower()):
         print(f"Owner '{name}' already exists. No new Pokedex created.")
         return
 
-    starter_choice = input("Your choice:")
+    starter_choice = input("Your choice: ")
     while starter_choice not in ['1', '2', '3']:
         print("Invalid input.")
-        starter_choice = input("Your choice:")
+        starter_choice = input("Your choice: ")
     starter_choice = int(starter_choice)
     # Convert input to index and multiply by 3 to find the correct starter
     starter_choice = (starter_choice - 1) * 3
@@ -594,7 +621,7 @@ def existing_pokedex():
     - Back
     """
     global owner_root
-    name = input("Owner name:")
+    name = input("Owner name: ")
     lower_name = name.lower()
     node = find_owner_bst(owner_root, lower_name)
     if not node:
@@ -605,7 +632,7 @@ def existing_pokedex():
     choice = -1
     while choice != '5':
         print(POKEDEX_MENU.format(node['name']))
-        choice = input("Your choice:")
+        choice = input("Your choice: ")
         if choice == '1':
             add_pokemon_to_owner(node)
         elif choice == '2':
@@ -617,7 +644,7 @@ def existing_pokedex():
         elif choice == '5':
             pass
         else:
-            print('Invalid choice')  # TODO check this
+            print('Invalid choice')
 
 
 def main_menu():
@@ -634,7 +661,7 @@ def main_menu():
     choice = -1
     while choice != '6':
         print(MAIN_MENU)
-        choice = input("Your choice:")
+        choice = input("Your choice: ")
 
         # Ensure choice is digit
         if not choice.isdigit():
@@ -642,6 +669,9 @@ def main_menu():
         elif choice == '1':
             owner_root = create_pokedex(owner_root)
         elif choice == '2':
+            if owner_root is None:
+                print('No owners at all.')
+                continue
             existing_pokedex()
         elif choice == '3':
             owner_root = delete_owner(owner_root)
@@ -655,6 +685,8 @@ def main_menu():
             print("Invalid choice.")
 
     print("Goodbye!")
+
+
 def main():
     """
     Entry point: calls main_menu().
