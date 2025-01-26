@@ -293,7 +293,7 @@ def release_pokemon_by_name(owner_node):
     """
     Prompt user for a Pokemon name, remove it from this owner's pokedex if found.
     """
-    # Enumarate returns a tuple: (index, pokemon)
+    # Enumerate returns a tuple: (index, pokemon)
     index_to_remove = -1
     pokemon_name = ''
     name = input("Enter Pokemon Name to release:")
@@ -380,21 +380,28 @@ def sort_owners_by_num_pokemon(root):
     Gather owners, sort them by (#pokedex size, then alpha), print results.
     """
     owners_arr: list = gather_all_owners(root)
-    # Start by adding the first owner
-    result = [owners_arr.pop(0)]
+    is_sorted = False
+    while not is_sorted:
+        is_sorted = True
+        for index in range(len(owners_arr) - 1):
+            current_len = len(owners_arr[index]['pokedex'])
+            next_len = len(owners_arr[index + 1]['pokedex'])
+            if current_len == next_len:
+                current_name = owners_arr[index]['name']
+                next_name = owners_arr[index+ 1]['name']
+                if current_name > next_name:
+                    # "Swap"
+                    temp = owners_arr.pop(index + 1)
+                    owners_arr.insert(index, temp)
+                    is_sorted = False
+            elif current_len > next_len:
+                # "Swap"
+                temp = owners_arr.pop(index + 1)
+                owners_arr.insert(index, temp)
+                is_sorted = False
 
-    # Go while the list isn't empty
-    while owners_arr:
-        current_owner = owners_arr.pop(0)
-        current_pokenum = len(current_owner['pokedex'])
-        index = 0
-        for index, owner in enumerate(result):
-            if current_pokenum < len(owner['pokedex']):
-                # insert the current owner before the owner we just found
-                result.insert(index, current_owner)
-                break
     print('=== The Owners we have, sorted by number of Pokemons ===')
-    for owner in result:
+    for owner in owners_arr:
         print(f"Owner: {owner['name']} (has {len(owner['pokedex'])} Pokemon)")
 
 
@@ -405,6 +412,17 @@ def sort_owners_by_num_pokemon(root):
 def print_all_owners():
     """
     Let user pick BFS, Pre, In, or Post. Print each owner's data/pokedex accordingly.
+    """
+    print(PRINT_OWNERS_MENU)
+    choice = input("Your choice:")
+    while choice not in ['1', '2', '3', '4']:
+        print("Invalid choice")  # TODO check
+        choice = input("Your choice:")
+
+
+def bfs_print(node):
+    """
+    Helper to print data in pre-order.
     """
     pass
 
@@ -544,7 +562,7 @@ def existing_pokedex():
     global owner_root
     name = input("Owner name:")
     lower_name = name.lower()
-    node = find_owner_bst(owner_root, name)
+    node = find_owner_bst(owner_root, lower_name)
     if not node:
         print(f"Owner '{name}' not found.")
         return
@@ -595,6 +613,8 @@ def main_menu():
             owner_root = delete_owner(owner_root)
         elif choice == '4':
             sort_owners_by_num_pokemon(owner_root)
+        elif choice == '5':
+            pass
         else:
             print("Invalid input")  # TODO check
 
