@@ -8,7 +8,7 @@ MAIN_MENU = """
 2. Existing Pokedex
 3. Delete a Pokedex
 4. Display owners by number of Pokemon
-5. Print all
+5. Print All
 6. Exit"""
 STARTER_MENU = '''Choose your starter Pokemon:
 1) Treecko
@@ -271,13 +271,14 @@ def add_pokemon_to_owner(owner_node):
     poke_id = -1
     while not valid_choice:
         poke_id = input("Enter Pokemon ID to add:")
+        print("ADDING", poke_id)
         if not poke_id.isdecimal():
             print("Invalid choice")  # TODO check this
-            continue
+            return
         poke_id = int(poke_id)
         if poke_id < 1 or poke_id > 135:
-            print("Invalid choice")  # TODO check this
-            continue
+            print(f"ID {poke_id} not found in Honen data.")
+            return
         valid_choice = True
     # Get all pokemon IDs
     pokemons_ids = [pokemon['ID'] for pokemon in owner_node['pokedex']]
@@ -307,7 +308,7 @@ def release_pokemon_by_name(owner_node):
         print(f"Releasing {pokemon_name} from {owner_node['name']}.")
         owner_node['pokedex'].pop(index_to_remove)
     else:
-        print(f"No Pokemon named '{name}' in Eliyahu's Pokedex.")
+        print(f"No Pokemon named '{name}' in {owner_node['name']}'s Pokedex.")
 
 
 def evolve_pokemon_by_name(owner_node):
@@ -495,9 +496,9 @@ def display_filter_sub_menu(owner_node):
     6) All
     7) Back
     """
-    print(FILTER_MENU)
     choice = -1
     while choice != '7':
+        print(FILTER_MENU)
         choice = input("Your choice:")
         pokemon_list = []
         if choice == '1':
@@ -569,7 +570,7 @@ def create_pokedex(owner_root):
 
     starter_choice = input("Your choice:")
     while starter_choice not in ['1', '2', '3']:
-        print("Invalid input")  # TODO check
+        print("Invalid input.")
         starter_choice = input("Your choice:")
     starter_choice = int(starter_choice)
     # Convert input to index and multiply by 3 to find the correct starter
@@ -603,7 +604,7 @@ def existing_pokedex():
 
     choice = -1
     while choice != '5':
-        print(POKEDEX_MENU.format(name))
+        print(POKEDEX_MENU.format(node['name']))
         choice = input("Your choice:")
         if choice == '1':
             add_pokemon_to_owner(node)
@@ -637,7 +638,7 @@ def main_menu():
 
         # Ensure choice is digit
         if not choice.isdigit():
-            print("Invalid input")  # TODO check
+            print("Invalid choice.")
         elif choice == '1':
             owner_root = create_pokedex(owner_root)
         elif choice == '2':
@@ -648,10 +649,12 @@ def main_menu():
             sort_owners_by_num_pokemon(owner_root)
         elif choice == '5':
             print_all_owners(owner_root)
+        elif choice == '6':
+            break
         else:
-            print("Invalid input")  # TODO check
+            print("Invalid choice.")
 
-
+    print("Goodbye!")
 def main():
     """
     Entry point: calls main_menu().
