@@ -4,12 +4,12 @@ import csv
 owner_root = None
 MAIN_MENU = """
 === Main Menu ===
-1) New Pokedex
-2) Existing Pokedex
-3) Delete a Pokedex
-4) Sort owners
-5) Print all
-6) Exit"""
+1. New Pokedex
+2. Existing Pokedex
+3. Delete a Pokedex
+4. Display owners by number of Pokemon
+5. Print all
+6. Exit"""
 STARTER_MENU = '''Choose your starter Pokemon:
 1) Treecko
 2) Torchic
@@ -388,7 +388,7 @@ def sort_owners_by_num_pokemon(root):
             next_len = len(owners_arr[index + 1]['pokedex'])
             if current_len == next_len:
                 current_name = owners_arr[index]['name']
-                next_name = owners_arr[index+ 1]['name']
+                next_name = owners_arr[index + 1]['name']
                 if current_name > next_name:
                     # "Swap"
                     temp = owners_arr.pop(index + 1)
@@ -408,44 +408,77 @@ def sort_owners_by_num_pokemon(root):
 ########################
 # 6) Print All
 ########################
+def print_owner(owner):
+    print()
+    print(f'Owner: {owner["name"]}')
+    display_pokemon_list(owner["pokedex"])
 
-def print_all_owners():
+
+def print_all_owners(root):
     """
     Let user pick BFS, Pre, In, or Post. Print each owner's data/pokedex accordingly.
     """
+
     print(PRINT_OWNERS_MENU)
     choice = input("Your choice:")
     while choice not in ['1', '2', '3', '4']:
         print("Invalid choice")  # TODO check
         choice = input("Your choice:")
+    if choice == '1':
+        bfs_print(root)
+    elif choice == '2':
+        pre_order_print(root)
+    elif choice == '3':
+        in_order_print(root)
+    elif choice == '4':
+        post_order_print(root)
 
 
 def bfs_print(node):
     """
     Helper to print data in pre-order.
     """
-    pass
+    queue = [node]
+    while queue:
+        current_node = queue.pop(0)
+        print_owner(current_node)
+        if current_node["left"]:
+            queue.append(current_node["left"])
+        if current_node["right"]:
+            queue.append(current_node["right"])
 
 
 def pre_order_print(node):
     """
     Helper to print data in pre-order.
     """
-    pass
+    print_owner(node)
+    if node["left"]:
+        pre_order_print(node["left"])
+    if node["right"]:
+        pre_order_print(node["right"])
 
 
 def in_order_print(node):
     """
     Helper to print data in in-order.
     """
-    pass
+    if node["left"]:
+        in_order_print(node["left"])
+    print_owner(node)
+    if node["right"]:
+        in_order_print(node["right"])
 
 
 def post_order_print(node):
     """
     Helper to print data in post-order.
     """
-    pass
+    if node["left"]:
+        post_order_print(node["left"])
+    if node["right"]:
+        post_order_print(node["right"])
+    print_owner(node)
 
 
 ########################
@@ -614,7 +647,7 @@ def main_menu():
         elif choice == '4':
             sort_owners_by_num_pokemon(owner_root)
         elif choice == '5':
-            pass
+            print_all_owners(owner_root)
         else:
             print("Invalid input")  # TODO check
 
