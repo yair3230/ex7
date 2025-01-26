@@ -341,16 +341,50 @@ def display_filter_sub_menu(owner_node):
 
             # In one line:
             # pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Type'].lower() == lower_type]
-        if choice == '2':
-            # Not that for some dumb fucking reason can evolve is a string and not a bool
+        elif choice == '2':
+            # Note that for some dumb reason "can evolve" is a string and not a bool
             pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Can Evolve'] == 'TRUE']
-        if choice == '3':
-            pass
+        elif choice == '3':
+            attack_threshold = input("Enter Attack threshold:")
+            if not attack_threshold.isdecimal():
+                print("Invalid input")  # TODO check
+                continue
+            attack_threshold = int(attack_threshold)
+            for pokemon in owner_node['pokedex']:
+                if pokemon['Attack'] > attack_threshold:
+                    pokemon_list.append(pokemon)
+
+            # In one line:
+            # pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['Attack'] > attack_threshold]
+        elif choice == '4':
+            hp_threshold = input("Enter HP threshold:")
+            if not hp_threshold.isdecimal():
+                print("Invalid input")  # TODO check
+                continue
+            hp_threshold = int(hp_threshold)
+            for pokemon in owner_node['pokedex']:
+                if pokemon['HP'] > hp_threshold:
+                    pokemon_list.append(pokemon)
+            # In one line:
+            # pokemon_list = [pokemon for pokemon in owner_node['pokedex'] if pokemon['HP'] > hp_threshold]
+        elif choice == '5':
+            letters = input("Starting letter(s):")
+            lower_letters = letters.lower()
+            for pokemon in owner_node['pokedex']:
+                name_lower = pokemon['Name'].lower()
+                if name_lower.startswith(lower_letters):
+                    pokemon_list.append(pokemon)
+            # In one line:
+            # pokemon_list = [pokemon for pokemon in owner_node['pokedex']
+            #                 if pokemon['Name'].lower().startswith(lower_letters)]
+        elif choice == '6':
+            pokemon_list = [pokemon for pokemon in owner_node['pokedex']]
+        elif choice == '7':
+            break
         if pokemon_list:
             display_pokemon_list(pokemon_list)
         else:
             print('There are no Pokemons in this Pokedex that match the criteria.')
-
 
 
 ########################
@@ -397,9 +431,10 @@ def existing_pokedex():
         print(f"Owner '{name}' not found.")
         return
     # Else
-    print(POKEDEX_MENU.format(name))
+
     choice = -1
     while choice != '5':
+        print(POKEDEX_MENU.format(name))
         choice = input("Your choice:")
         if choice == '1':
             add_pokemon_to_owner(node)
