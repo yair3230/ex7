@@ -286,7 +286,6 @@ def add_pokemon_to_owner(owner_node):
         return
     pokemon_data = HOENN_DATA[poke_id - 1]
     owner_node['pokedex'].append(pokemon_data)
-    print()
     print(f"Pokemon {pokemon_data['Name']} (ID {pokemon_data['ID']}) added to {owner_node['name']}'s Pokedex.")
 
 
