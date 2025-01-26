@@ -31,6 +31,11 @@ FILTER_MENU = '''-- Display Filter Menu --
 6. All of them!
 7. Back
 '''
+PRINT_OWNERS_MENU = '''1) BFS
+2) Pre-Order
+3) In-Order
+4) Post-Order
+'''
 
 
 ########################
@@ -116,7 +121,9 @@ def create_owner_node(owner_name, first_pokemon=None):
     Create and return a BST node dict with keys: 'owner', 'pokedex', 'left', 'right'.
     """
     index = first_pokemon - 1
-    return {'name': owner_name, 'pokedex': [HOENN_DATA[index]], 'left': None, 'right': None}
+    return {'name': owner_name,
+            'pokedex': [HOENN_DATA[index]],
+            'left': None, 'right': None}
 
 
 def insert_owner_bst(root, new_node):
@@ -172,14 +179,52 @@ def min_node(node):
     """
     Return the leftmost node in a BST subtree.
     """
-    pass
+    while node['left'] is not None:
+        node = node['left']
+    return node
 
 
 def delete_owner_bst(root, owner_name):
-    """
-    Remove a node from the BST by owner_name. Return updated root.
-    """
-    pass
+    if not root:
+        return root
+
+    # Find the node to remove
+    if owner_name < root['name']:
+        root['left'] = delete_owner_bst(root['left'], owner_name)
+    elif owner_name > root['name']:
+        root['right'] = delete_owner_bst(root['right'], owner_name)
+    else:
+        # Node to be removed found
+        # Case 1: Node with no children (leaf node)
+        if not root['left'] and not root['right']:
+            return None
+
+        # Case 2: Node with one child
+        if not root['left']:
+            return root['right']
+        elif not root['right']:
+            return root['left']
+
+        # Case 3: Node with two children
+        # Find the in-order successor (smallest value in the right subtree)
+        successor = min_node(root['right'])
+        root['name'] = successor['name']
+        root['pokedex'] = successor['pokedex']
+        root['right'] = delete_owner_bst(root['right'], successor['name'])
+
+    return root
+
+
+def delete_owner(root):
+    name = input('Enter owner to delete:')
+    if find_owner_bst(root, name):
+        print(f"Deleting {name}'s entire Pokedex...")
+        root = delete_owner_bst(root, name)
+        print(f'Pokedex deleted.')
+        return root
+    else:
+        print(f"Owner '{name}' not found.")
+        return root
 
 
 ########################
@@ -337,7 +382,6 @@ def print_all_owners():
     """
     Let user pick BFS, Pre, In, or Post. Print each owner's data/pokedex accordingly.
     """
-    pass
 
 
 def pre_order_print(node):
@@ -522,6 +566,10 @@ def main_menu():
             owner_root = create_pokedex(owner_root)
         elif choice == '2':
             existing_pokedex()
+        elif choice == '3':
+            owner_root = delete_owner(owner_root)
+        elif choice == '4':
+            pass
         else:
             print("Invalid input")  # TODO check
 
