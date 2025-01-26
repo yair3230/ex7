@@ -359,19 +359,43 @@ def evolve_pokemon_by_name(owner_node):
 ########################
 # 5) Sorting Owners by # of Pokemon
 ########################
+def gather_all_owners_inner(root, arr):
+    arr.append(root)
+    if root['left']:
+        arr = gather_all_owners_inner(root['left'], arr)
+    if root['right']:
+        arr = gather_all_owners_inner(root['right'], arr)
+    return arr
 
-def gather_all_owners(root, arr):
+
+def gather_all_owners(root):
     """
     Collect all BST nodes into a list (arr).
     """
-    pass
+    return gather_all_owners_inner(root, [])
 
 
-def sort_owners_by_num_pokemon():
+def sort_owners_by_num_pokemon(root):
     """
     Gather owners, sort them by (#pokedex size, then alpha), print results.
     """
-    pass
+    owners_arr: list = gather_all_owners(root)
+    # Start by adding the first owner
+    result = [owners_arr.pop(0)]
+
+    # Go while the list isn't empty
+    while owners_arr:
+        current_owner = owners_arr.pop(0)
+        current_pokenum = len(current_owner['pokedex'])
+        index = 0
+        for index, owner in enumerate(result):
+            if current_pokenum < len(owner['pokedex']):
+                # insert the current owner before the owner we just found
+                result.insert(index, current_owner)
+                break
+    print('=== The Owners we have, sorted by number of Pokemons ===')
+    for owner in result:
+        print(f"Owner: {owner['name']} (has {len(owner['pokedex'])} Pokemon)")
 
 
 ########################
@@ -382,6 +406,7 @@ def print_all_owners():
     """
     Let user pick BFS, Pre, In, or Post. Print each owner's data/pokedex accordingly.
     """
+    pass
 
 
 def pre_order_print(node):
@@ -569,7 +594,7 @@ def main_menu():
         elif choice == '3':
             owner_root = delete_owner(owner_root)
         elif choice == '4':
-            pass
+            sort_owners_by_num_pokemon(owner_root)
         else:
             print("Invalid input")  # TODO check
 
