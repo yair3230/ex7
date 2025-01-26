@@ -350,7 +350,7 @@ def evolve_pokemon_by_name(owner_node):
 
     if evolved_pokemon in owner_node['pokedex']:
         # Display this message, but nothing left to do
-        print('Marshtomp was already present; releasing it immediately.')
+        print(f'{evolved_pokemon["Name"]} was already present; releasing it immediately.')
     else:
         # Actually add the evolution to the list
         owner_node['pokedex'].append(evolved_pokemon)
@@ -360,6 +360,8 @@ def evolve_pokemon_by_name(owner_node):
 # 5) Sorting Owners by # of Pokemon
 ########################
 def gather_all_owners_inner(root, arr):
+    if not root:
+        return []
     arr.append(root)
     if root['left']:
         arr = gather_all_owners_inner(root['left'], arr)
@@ -380,6 +382,9 @@ def sort_owners_by_num_pokemon(root):
     Gather owners, sort them by (#pokedex size, then alpha), print results.
     """
     owners_arr: list = gather_all_owners(root)
+    if not owners_arr:
+        print('No owners at all.')
+        return
     is_sorted = False
     while not is_sorted:
         is_sorted = True
@@ -388,7 +393,9 @@ def sort_owners_by_num_pokemon(root):
             next_len = len(owners_arr[index + 1]['pokedex'])
             if current_len == next_len:
                 current_name = owners_arr[index]['name']
+                current_name = current_name.lower()
                 next_name = owners_arr[index + 1]['name']
+                next_name = next_name.lower()
                 if current_name > next_name:
                     # "Swap"
                     temp = owners_arr.pop(index + 1)
@@ -421,8 +428,10 @@ def print_all_owners(root):
 
     print(PRINT_OWNERS_MENU)
     choice = input("Your choice: ")
+
     while choice not in ['1', '2', '3', '4']:
         print("Invalid choice.")
+        print(PRINT_OWNERS_MENU)
         choice = input("Your choice: ")
     if choice == '1':
         bfs_print(root)
@@ -576,6 +585,7 @@ def display_filter_sub_menu(owner_node):
         elif choice == '6':
             pokemon_list = [pokemon for pokemon in owner_node['pokedex']]
         elif choice == '7':
+            print("Back to Pokedex Menu.")
             break
         if pokemon_list:
             display_pokemon_list(pokemon_list)
@@ -632,18 +642,33 @@ def existing_pokedex():
     while choice != '5':
         print(POKEDEX_MENU.format(node['name']))
         choice = input("Your choice: ")
+        while choice not in ['1', '2', '3', '4', '5']:
+            if choice[0] == '-' and choice[1:].isdigit():
+                print("Invalid choice.")
+                print(POKEDEX_MENU.format(node['name']))
+                choice = input("Your choice: ")
+            elif not choice.isdigit():
+                print("Invalid input.")
+                choice = input("Your choice: ")
+            else:
+                print("Invalid choice.")
+                print(POKEDEX_MENU.format(node['name']))
+                choice = input("Your choice: ")
         if choice == '1':
             add_pokemon_to_owner(node)
         elif choice == '2':
+            print()
             display_filter_sub_menu(node)
         elif choice == '3':
             release_pokemon_by_name(node)
         elif choice == '4':
             evolve_pokemon_by_name(node)
         elif choice == '5':
-            pass
+            print('Back to Main Menu.')
+            break
         else:
-            print('Invalid choice')
+            choice = 0
+
 
 
 def main_menu():
