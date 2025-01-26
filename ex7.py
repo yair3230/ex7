@@ -248,7 +248,21 @@ def release_pokemon_by_name(owner_node):
     """
     Prompt user for a Pokemon name, remove it from this owner's pokedex if found.
     """
-    pass
+    # Enumarate returns a tuple: (index, pokemon)
+    index_to_remove = -1
+    pokemon_name = ''
+    name = input("Enter Pokemon Name to release:")
+    name_lower = name.lower()
+    for index, pokemon in enumerate(owner_node['pokedex']):
+        pokemon_name = pokemon['Name']
+        if pokemon_name.lower() == name_lower:
+            index_to_remove = index
+            break  # found it, stop searching
+    if index_to_remove != -1:
+        print(f"Releasing {pokemon_name} from {owner_node['name']}.")
+        owner_node['pokedex'].pop(index_to_remove)
+    else:
+        print(f"No Pokemon named '{name}' in Eliyahu's Pokedex.")
 
 
 def evolve_pokemon_by_name(owner_node):
@@ -259,7 +273,42 @@ def evolve_pokemon_by_name(owner_node):
     3) Insert new
     4) If new is a duplicate, remove it immediately
     """
-    pass
+    name = input('Enter Pokemon Name to evolve:')
+    name_lower = name.lower()
+    index_to_remove = -1
+    pokemon_to_evolve = None
+    pokemon_name = ''
+
+    # find pokemon
+    for index, pokemon in enumerate(owner_node['pokedex']):
+        pokemon_name = pokemon['Name']
+        if pokemon_name.lower() == name_lower:
+            index_to_remove = index
+            pokemon_to_evolve = pokemon
+            break  # found it, stop searching
+
+    if index_to_remove == -1:
+        print("Pokemon not found")  # TODO check
+        return
+    if pokemon_to_evolve['Can Evolve'] == 'FALSE':
+        print("Pokemon cannot evolve")  # TODO check
+        return
+
+    # Else, Find evolution
+    evolution_id = pokemon_to_evolve['ID'] + 1
+    evolved_pokemon = HOENN_DATA[evolution_id - 1]
+    print(f"Pokemon evolved from {pokemon_name} (ID {evolution_id - 1})"
+          f" to {evolved_pokemon['Name']} (ID {evolution_id}).")
+
+    # Remove old
+    owner_node['pokedex'].pop(index_to_remove)
+
+    if evolved_pokemon in owner_node['pokedex']:
+        # Display this message, but nothing left to do
+        print('Marshtomp was already present; releasing it immediately.')
+    else:
+        # Actually add the evolution to the list
+        owner_node['pokedex'].append(evolved_pokemon)
 
 
 ########################
@@ -441,9 +490,9 @@ def existing_pokedex():
         elif choice == '2':
             display_filter_sub_menu(node)
         elif choice == '3':
-            pass
+            release_pokemon_by_name(node)
         elif choice == '4':
-            pass
+            evolve_pokemon_by_name(node)
         elif choice == '5':
             pass
         else:
